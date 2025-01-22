@@ -1,6 +1,6 @@
 /* 
 This collection of functions calculates the Critical Wind Speed for a stand using
-the ForestGales roughness algorithm. The data needs to go through the fg_rou_dataprep_Norge_cpp
+the ForestGales roughness algorithm. The data needs to go through the fg_rou_dataprep_Norway_cpp
 function first in order to gather all the required variables if they are not present.
 */
 
@@ -607,7 +607,7 @@ double deflection_fun_cpp(double x, double lever_arm, double fow, double dbh, do
 }
 
 // [[Rcpp::export]]
-double dlf_fun_Scand_cpp(double bm, double ht, double cr_depth, double cr_width, double cr_prarea, double crown_off, double stem_vol, double dbh, double moe, double crown_density, double stem_density, double snow_load, Rcpp::DataFrame fgr_constants) {
+double dlf_fun_Norway_cpp(double bm, double ht, double cr_depth, double cr_width, double cr_prarea, double crown_off, double stem_vol, double dbh, double moe, double crown_density, double stem_density, double snow_load, Rcpp::DataFrame fgr_constants) {
 	double grav = fgr_constants["grav"];
 	
 	double fow = force_of_wind_fun_cpp(bm, ht, cr_depth);
@@ -659,7 +659,7 @@ The applied bending moment; The zero plane displacement height; The ratio of cri
 bending moment.
 */
 // [[Rcpp::export]]
-Rcpp::DataFrame uh_breakage_rou_Scand_cpp(Rcpp::NumericVector mean_ht, Rcpp::NumericVector mean_dbh, Rcpp::NumericVector spacing, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
+Rcpp::DataFrame uh_breakage_rou_Norway_cpp(Rcpp::NumericVector mean_ht, Rcpp::NumericVector mean_dbh, Rcpp::NumericVector spacing, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
 Rcpp::NumericVector mean_cr_width, Rcpp::NumericVector mean_cr_depth, Rcpp::NumericVector mean_cr_prarea, Rcpp::NumericVector crown_off, Rcpp::NumericVector moe, Rcpp::NumericVector mor, Rcpp::NumericVector fknot, Rcpp::NumericVector n_drag, Rcpp::NumericVector c_drag, Rcpp::NumericVector drag_upper_limit,
 Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVector crown_density, Rcpp::NumericVector snow_load, double ro, Rcpp::DataFrame fgr_constants, Rcpp::NumericVector aerodynamic_ht) {
 	
@@ -690,7 +690,7 @@ Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVec
 		while(abs(uguess1 - uh_b[i]) > wind_precision){
 			uguess1 = uguess;			
 			bm_rou[i] = bending_moment_rou_cpp(mean_dbh[i], mean_ht[i], mean_cr_width[i], mean_cr_depth[i], spacing[i], dist_edge[i], gap_size[i], uguess, n_drag[i], c_drag[i], drag_upper_limit[i], ro, fgr_constants, aerodynamic_ht[i]);
-			dlf_calc[i] = dlf_fun_Scand_cpp(bm_rou[i], mean_ht[i], mean_cr_depth[i], mean_cr_width[i], mean_cr_prarea[i], crown_off[i], stem_vol[i], mean_dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
+			dlf_calc[i] = dlf_fun_Norway_cpp(bm_rou[i], mean_ht[i], mean_cr_depth[i], mean_cr_width[i], mean_cr_prarea[i], crown_off[i], stem_vol[i], mean_dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
 			dlf_used[i] = dlf_calc[i];
 			if(dlf_used[i] < 0.0) {dlf_used[i] = dlf;} else if(dlf_used[i] > dlf_threshold) {dlf_used[i] = dlf_threshold;}
 			zpd[i] = zpd_fun_cpp(mean_cr_width[i], mean_cr_depth[i], spacing[i], uguess, n_drag[i], c_drag[i], drag_upper_limit[i], aerodynamic_ht[i], fgr_constants);
@@ -713,7 +713,7 @@ Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVec
 // note I removed the dlf_threshold as an input variable here, instead modifications of this variable should be done directly in the fgr_constants file.
 
 // [[Rcpp::export]]
-Rcpp::DataFrame uh_breakage_tmc_Scand_cpp(Rcpp::NumericVector tree_ht, Rcpp::NumericVector dbh, Rcpp::NumericVector cr_depth, Rcpp::NumericVector cr_width, 
+Rcpp::DataFrame uh_breakage_tmc_Norway_cpp(Rcpp::NumericVector tree_ht, Rcpp::NumericVector dbh, Rcpp::NumericVector cr_depth, Rcpp::NumericVector cr_width, 
 Rcpp::NumericVector cr_prarea, Rcpp::NumericVector crown_off, 
 Rcpp::NumericVector spacing_current, Rcpp::NumericVector spacing_before, Rcpp::IntegerVector years_since_thin, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
 Rcpp::NumericVector moe, Rcpp::NumericVector mor, Rcpp::NumericVector fknot, 
@@ -752,7 +752,7 @@ Rcpp::NumericVector aerodynamic_ht){
 		while(abs(uguess1[i] - uh_b[i]) > wind_precision){
 			uguess1[i] = uguess[i];
 			bm_tmc[i] = tmc[i] * pow(uguess[i], 2);
-			dlf_calc[i] = dlf_fun_Scand_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
+			dlf_calc[i] = dlf_fun_Norway_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
 			dlf_used[i] = dlf_calc[i];
 			if(dlf_used[i] < 1.0) {dlf_used[i] = dlf;} else if(dlf_used[i] > dlf_threshold) {dlf_used[i] = dlf_threshold;}
 			tmr_full[i] = tm_ratio_cpp(spacing_before[i], spacing_current[i], years_since_thin[i], stand_cr_width[i], stand_cr_depth[i], uguess[i], n_drag[i], c_drag[i], drag_upper_limit[i], aerodynamic_ht[i], fgr_constants);
@@ -770,7 +770,7 @@ Rcpp::NumericVector aerodynamic_ht){
 	
 
 // [[Rcpp::export]]
-Rcpp::DataFrame uh_breakage_tmc_tmr_simple_Scand_cpp(Rcpp::NumericVector tree_ht, Rcpp::NumericVector dbh, Rcpp::NumericVector cr_depth, Rcpp::NumericVector cr_width, 
+Rcpp::DataFrame uh_breakage_tmc_tmr_simple_Norway_cpp(Rcpp::NumericVector tree_ht, Rcpp::NumericVector dbh, Rcpp::NumericVector cr_depth, Rcpp::NumericVector cr_width, 
 Rcpp::NumericVector cr_prarea, Rcpp::NumericVector crown_off, 
 Rcpp::NumericVector spacing_current, Rcpp::NumericVector spacing_before, Rcpp::IntegerVector years_since_thin, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
 Rcpp::NumericVector equivalent_mean_ht, Rcpp::NumericVector moe, Rcpp::NumericVector mor, Rcpp::NumericVector fknot, 
@@ -807,7 +807,7 @@ Rcpp::StringVector ci, Rcpp::NumericVector ci_value, Rcpp::DataFrame fgr_constan
 		while(abs(uguess1[i] - uh_b[i]) > wind_precision){
 			uguess1[i] = uguess[i];
 			bm_tmc[i] = tmc[i] * pow(uguess[i], 2);
-			dlf_calc[i] = dlf_fun_Scand_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
+			dlf_calc[i] = dlf_fun_Norway_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
 			dlf_used[i] = dlf_calc[i];
 			if(dlf_used[i] < 1.0) {dlf_used[i] = dlf;} else if(dlf_used[i] > dlf_threshold) {dlf_used[i] = dlf_threshold;}
 			tmr_simple[i] = tm_ratio_simple_cpp(spacing_before[i], spacing_current[i], years_since_thin[i]);
@@ -853,7 +853,7 @@ bending moment.
 */
 
 // [[Rcpp::export]]
-Rcpp::DataFrame uh_overturning_rou_Scand_cpp(Rcpp::NumericVector mean_ht, Rcpp::NumericVector mean_dbh, Rcpp::NumericVector spacing, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
+Rcpp::DataFrame uh_overturning_rou_Norway_cpp(Rcpp::NumericVector mean_ht, Rcpp::NumericVector mean_dbh, Rcpp::NumericVector spacing, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
 Rcpp::NumericVector mean_cr_width, Rcpp::NumericVector mean_cr_depth, Rcpp::NumericVector mean_cr_prarea, Rcpp::NumericVector crown_off, Rcpp::NumericVector moe, Rcpp::NumericVector c_reg, Rcpp::NumericVector n_drag, Rcpp::NumericVector c_drag, Rcpp::NumericVector drag_upper_limit,
 Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVector crown_density, Rcpp::NumericVector snow_load, double ro, Rcpp::DataFrame fgr_constants, Rcpp::NumericVector aerodynamic_ht) {
 	
@@ -883,7 +883,7 @@ Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVec
 		while(abs(uguess1 - uh_o[i]) > wind_precision){
 			uguess1 = uguess;
 			bm_rou[i] = bending_moment_rou_cpp(mean_dbh[i], mean_ht[i], mean_cr_width[i], mean_cr_depth[i], spacing[i], dist_edge[i], gap_size[i], uguess, n_drag[i], c_drag[i], drag_upper_limit[i], ro, fgr_constants, aerodynamic_ht[i]);
-			dlf_calc[i] = dlf_fun_Scand_cpp(bm_rou[i], mean_ht[i], mean_cr_depth[i], mean_cr_width[i], mean_cr_prarea[i], crown_off[i], stem_vol[i], mean_dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
+			dlf_calc[i] = dlf_fun_Norway_cpp(bm_rou[i], mean_ht[i], mean_cr_depth[i], mean_cr_width[i], mean_cr_prarea[i], crown_off[i], stem_vol[i], mean_dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
 			dlf_used[i] = dlf_calc[i];
 			if(dlf_used[i] < 0.0) {dlf_used[i] = dlf;} else if(dlf_used[i] > dlf_threshold) {dlf_used[i] = dlf_threshold;}
 			zpd[i] = zpd_fun_cpp(mean_cr_width[i], mean_cr_depth[i], spacing[i], uguess, n_drag[i], c_drag[i], drag_upper_limit[i], aerodynamic_ht[i], fgr_constants);
@@ -904,7 +904,7 @@ Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVec
 
 // CWS OVERTURNING - TMC VERSION
 // [[Rcpp::export]]
-Rcpp::DataFrame uh_overturning_tmc_Scand_cpp(Rcpp::NumericVector tree_ht, Rcpp::NumericVector dbh, Rcpp::NumericVector cr_depth, Rcpp::NumericVector cr_width, 
+Rcpp::DataFrame uh_overturning_tmc_Norway_cpp(Rcpp::NumericVector tree_ht, Rcpp::NumericVector dbh, Rcpp::NumericVector cr_depth, Rcpp::NumericVector cr_width, 
 Rcpp::NumericVector cr_prarea, Rcpp::NumericVector crown_off, 
 Rcpp::NumericVector spacing_current, Rcpp::NumericVector spacing_before, Rcpp::IntegerVector years_since_thin, Rcpp::NumericVector dist_edge, Rcpp::NumericVector gap_size, 
 Rcpp::NumericVector moe, Rcpp::NumericVector c_reg, Rcpp::NumericVector stem_vol, Rcpp::NumericVector stem_density, Rcpp::NumericVector crown_density, Rcpp::NumericVector snow_load, 
@@ -942,7 +942,7 @@ Rcpp::NumericVector aerodynamic_ht){
 		while(abs(uguess1[i] - uh_o[i]) > wind_precision){
 			uguess1[i] = uguess[i];
 			bm_tmc[i] = tmc[i] * pow(uguess[i], 2);
-			dlf_calc[i] = dlf_fun_Scand_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
+			dlf_calc[i] = dlf_fun_Norway_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
 			dlf_used[i] = dlf_calc[i];
 			if(dlf_used[i] < 1.0) {dlf_used[i] = dlf;} else if(dlf_used[i] > dlf_threshold) {dlf_used[i] = dlf_threshold;}
 			tmr_full[i] = tm_ratio_cpp(spacing_before[i], spacing_current[i], years_since_thin[i], stand_cr_width[i], stand_cr_depth[i], uguess[i], n_drag[i], c_drag[i], drag_upper_limit[i], aerodynamic_ht[i], fgr_constants);
@@ -996,7 +996,7 @@ Rcpp::NumericVector snow_load, Rcpp::StringVector ci, Rcpp::NumericVector ci_val
 		while(abs(uguess1[i] - uh_o[i]) > wind_precision){
 			uguess1[i] = uguess[i];
 			bm_tmc[i] = tmc[i] * pow(uguess[i], 2);
-			dlf_calc[i] = dlf_fun_Scand_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
+			dlf_calc[i] = dlf_fun_Norway_cpp(bm_tmc[i], tree_ht[i], cr_depth[i], cr_width[i], cr_prarea[i], crown_off[i], stem_vol[i], dbh[i], moe[i], crown_density[i], stem_density[i], snow_load[i], fgr_constants);
 			dlf_used[i] = dlf_calc[i];
 			if(dlf_used[i] < 1.0) {dlf_used[i] = dlf;} else if(dlf_used[i] > dlf_threshold) {dlf_used[i] = dlf_threshold;}
 			tmr_simple[i] = tm_ratio_simple_cpp(spacing_before[i], spacing_current[i], years_since_thin[i]);
@@ -1021,7 +1021,7 @@ See Critical Wind Speed and Critical Snow Load.pdf in T:\Aktive\DSU\3737\53280_F
 of this model. 
 */
 // [[Rcpp::export]]
-double csw_Scand_cpp(double tree_ht, double tree_dbh, double crown_weight, double cr_depth, double moe, double grav) {
+double csw_Norway_cpp(double tree_ht, double tree_dbh, double crown_weight, double cr_depth, double moe, double grav) {
 	// Note that we consider the crown offset to be negligible for the calculation of the critical snow load due to the
 	// simplifications made to the DLF to obtain the critical snow load.
 	// Note that DBH must be specified in meters
@@ -1086,7 +1086,7 @@ Rcpp::DataFrame uh_breakage_heightz_cpp(Rcpp::NumericVector uh_b, Rcpp::NumericV
 // MAIN FUNCTION - ROUGHNESS VERSION
 
 // [[Rcpp::export]]    
-Rcpp::List fg_rou_Scand_cpp(Rcpp::List inputdata_full, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters,
+Rcpp::List fg_rou_Norway_cpp(Rcpp::List inputdata_full, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters,
 Rcpp::Nullable<Rcpp::NumericVector> full_output_ = R_NilValue, std::string breakage_basecanopy = "no"){
 	// Check that the data has been properly prepared and that all the variables are present
 	std::cout << "Make sure to have run your data through the data preparation procedure first."<<std::endl;
@@ -1134,14 +1134,14 @@ Rcpp::Nullable<Rcpp::NumericVector> full_output_ = R_NilValue, std::string break
 	//int n = stand_id.size();
 	
 	// Calculate the critical wind speeds for breakage and for overturning
-	Rcpp::DataFrame uh_b_results = uh_breakage_rou_Scand_cpp(mean_ht, mean_dbh, spacing, 
+	Rcpp::DataFrame uh_b_results = uh_breakage_rou_Norway_cpp(mean_ht, mean_dbh, spacing, 
 	dist_edge, gap_size, mean_cr_width, mean_cr_depth, mean_cr_prarea, crown_off, moe, 
 	mor, fknot, n_drag, c_drag, drag_upper_limit, stem_vol, 
 	stem_density, crown_density, snow_load, ro,
 	fgr_constants, aerodynamic_ht);
 	
 	
-	Rcpp::DataFrame uh_o_results = uh_overturning_rou_Scand_cpp(mean_ht, mean_dbh, spacing, 
+	Rcpp::DataFrame uh_o_results = uh_overturning_rou_Norway_cpp(mean_ht, mean_dbh, spacing, 
 	dist_edge, gap_size, mean_cr_width, mean_cr_depth, mean_cr_prarea, crown_off, moe, 
 	c_reg, n_drag, c_drag, drag_upper_limit, stem_vol, 
 	stem_density, crown_density, snow_load, ro,
@@ -1297,7 +1297,7 @@ Rcpp::Nullable<Rcpp::NumericVector> full_output_ = R_NilValue, std::string break
 // MAIN FUNCTION - TMC VERSION
 
 // [[Rcpp::export]]    
-Rcpp::List fg_tmc_Scand_cpp(Rcpp::List inputdata_full, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters,
+Rcpp::List fg_tmc_Norway_cpp(Rcpp::List inputdata_full, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters,
 Rcpp::Nullable<Rcpp::NumericVector> full_output_ = R_NilValue, std::string breakage_basecanopy = "no"){
 	// Check that the data has been properly prepared and that all the variables are present
 	std::cout << "Make sure to have run your data through the data preparation procedure first."<<std::endl;
@@ -1352,14 +1352,14 @@ Rcpp::Nullable<Rcpp::NumericVector> full_output_ = R_NilValue, std::string break
 	Rcpp::NumericVector snow_load = others["snow_load"];
 		
 	// Calculate the critical wind speeds for breakage and for overturning	
-	Rcpp::DataFrame uh_b_results = uh_breakage_tmc_Scand_cpp(tree_ht, dbh, cr_depth, 
+	Rcpp::DataFrame uh_b_results = uh_breakage_tmc_Norway_cpp(tree_ht, dbh, cr_depth, 
 	cr_width, cr_prarea,  crown_off, spacing_current, spacing_before, years_since_thin, 
 	dist_edge, gap_size, moe, mor, fknot, stem_vol, stem_density, 
 	crown_density, snow_load, ci, ci_value, 
 	n_drag, c_drag, drag_upper_limit, equivalent_mean_ht, 
 	stand_cr_depth, stand_cr_width, fgr_constants, aerodynamic_ht);
 	
-	Rcpp::DataFrame uh_o_results = uh_overturning_tmc_Scand_cpp(tree_ht, dbh, cr_depth, 
+	Rcpp::DataFrame uh_o_results = uh_overturning_tmc_Norway_cpp(tree_ht, dbh, cr_depth, 
 	cr_width, cr_prarea,  crown_off, spacing_current, spacing_before, years_since_thin, 
 	dist_edge, gap_size, moe, c_reg, stem_vol, stem_density, 
 	crown_density, snow_load, ci, ci_value, 
@@ -1530,80 +1530,4 @@ Rcpp::Nullable<Rcpp::NumericVector> full_output_ = R_NilValue, std::string break
 	}
 	
 	return output_data;	
-}
-
-
-// MAIN FUNCTION - CRITICAL SNOW LOAD
-
-// [[Rcpp::export]]    
-Rcpp::DataFrame fg_csl_Scand_cpp(Rcpp::DataFrame inputdata_full, Rcpp::DataFrame fgr_constants, std::string rou_or_tmc = "rou"){
-	// Check that the data has been properly prepared and that all the variables are present
-	std::cout << "Make sure to have run your data through the data preparation procedure first."<<std::endl;
-	
-	// We extract all the required variables to run through the CriticalSnowLoad function	
-	// Identifier variables
-	Rcpp::StringVector stand_id = inputdata_full["stand_id"];
-	Rcpp::StringVector species = inputdata_full["species"];
-	// Other variables
-	Rcpp::NumericVector crown_weight = inputdata_full["crown_weight"];
-	Rcpp::NumericVector moe = inputdata_full["moe"];	
-	
-	// Get the length of the dataframe and initialize the other variables
-	int n = stand_id.size();
-	Rcpp::StringVector tree_id;
-	Rcpp::NumericVector ht;
-	Rcpp::NumericVector dbh;
-	Rcpp::NumericVector cr_depth;
-	Rcpp::NumericVector cr_prarea;	
-	
-	// Initialize the critical snow load variable
-	Rcpp::NumericVector csw(n);
-	Rcpp::NumericVector csl(n);
-	
-	if(rou_or_tmc == "rou"){
-		// Extract the required variables
-		ht = inputdata_full["mean_ht"];
-		dbh = inputdata_full["mean_dbh"];
-		cr_depth = inputdata_full["mean_cr_depth"];
-		cr_prarea = inputdata_full["mean_cr_prarea"];
-	} else {
-		tree_id = inputdata_full["tree_id"];
-		ht = inputdata_full["tree_ht"];
-		dbh = inputdata_full["dbh"];
-		cr_depth = inputdata_full["cr_depth"];
-		cr_prarea = inputdata_full["cr_prarea"];
-	}
-	
-	// Calculate the critical snow weight 
-	for (int i = 0; i < n; ++i){
-		csw[i] = csw_Scand_cpp(ht[i], dbh[i], crown_weight[i], cr_depth[i], moe[i], fgr_constants["grav"]);
-	}
-	
-	// Get the critical snow load
-	csl = csw/cr_prarea;	
-	
-	// Calculate the probability of damage -- TO DO
-	
-	Rcpp::DataFrame output_data;	
-	
-	// Return results dataframe - including the input data
-	if(rou_or_tmc == "rou"){
-		output_data = Rcpp::DataFrame::create(Rcpp::_["stand_id"] = Rcpp::clone(stand_id), Rcpp::_["species"] = Rcpp::clone(species), 
-		Rcpp::_["dbh"] = Rcpp::clone(ht), Rcpp::_["ht"] = Rcpp::clone(ht), 
-		Rcpp::_["cr_depth"] = Rcpp::clone(cr_depth), Rcpp::_["crown_weight"] = Rcpp::clone(crown_weight),
-		Rcpp::_["moe"] = Rcpp::clone(moe),
-		Rcpp::_["csw"] = Rcpp::clone(csw), Rcpp::_["csl"] = Rcpp::clone(csl)
-		//Rcpp::_["prob_damage"] = Rcpp::clone(prob_damage)
-		);	
-	} else {
-		output_data = Rcpp::DataFrame::create(Rcpp::_["stand_id"] = Rcpp::clone(stand_id), Rcpp::_["tree_id"] = Rcpp::clone(tree_id), 
-		Rcpp::_["species"] = Rcpp::clone(species), Rcpp::_["dbh"] = Rcpp::clone(ht), Rcpp::_["ht"] = Rcpp::clone(ht), 
-		Rcpp::_["cr_depth"] = Rcpp::clone(cr_depth), Rcpp::_["crown_weight"] = Rcpp::clone(crown_weight),
-		Rcpp::_["moe"] = Rcpp::clone(moe),
-		Rcpp::_["csw"] = Rcpp::clone(csw), Rcpp::_["csl"] = Rcpp::clone(csl)
-		//Rcpp::_["prob_damage"] = Rcpp::clone(prob_damage)
-		);
-	}
-	
-	return output_data;		
 }

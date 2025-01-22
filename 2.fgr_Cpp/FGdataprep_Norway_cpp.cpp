@@ -1,7 +1,7 @@
 
 #include <Rcpp.h>
 
-// Note we focus on the three main tree - NS, SP and BI - so some of the functions are only defined for those (namely stem volume)
+// Note we focus on the three main tree - NS (Norway spruce), SP (Scots pine) and BI (birch) - so some of the functions are only defined for those (namely stem volume)
 // [[Rcpp::export]]                                                                                                                                           
 bool contains_cpp(std::string s, Rcpp::DataFrame L) {                                                                                                                  
     Rcpp::CharacterVector nv = L.names();                                                                                                                     
@@ -59,7 +59,7 @@ Rcpp::StringVector extract_create_strcolumns_cpp(std::string s, Rcpp::DataFrame 
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericVector sp_params_Scand_fun_cpp(Rcpp::DataFrame species_parameters, Rcpp::String species, 
+Rcpp::NumericVector sp_params_Norway_fun_cpp(Rcpp::DataFrame species_parameters, Rcpp::String species, 
 Rcpp::String location, Rcpp::String dbh_class, Rcpp::String leafstatus){
 	
 	// Subset the DataFrame species_parameter to the row corresponding to the species (location and dbh_class)  
@@ -132,7 +132,7 @@ double canopy_width_fun_cpp(double param0_cr_width, double param1_cr_width, doub
 }
 
 // [[Rcpp::export]]
-double canopy_depth_Norge_fun_cpp(std::string species, Rcpp::NumericVector species_parameters, double dbh, double ht, std::string focus = "tree"){
+double canopy_depth_Norway_fun_cpp(std::string species, Rcpp::NumericVector species_parameters, double dbh, double ht, std::string focus = "tree"){
 	
 	//Note that dbh and ht need to be in mm and cm respectively for these formulas
 	
@@ -264,7 +264,7 @@ double stem_vol_andretreslag_fun_cpp(std::string species, double dbh, double ht,
 	return stem_vol_f;
 }
 // [[Rcpp::export]]
-double stem_vol_NSNorge_fun_cpp(std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters){
+double stem_vol_NSNorway_fun_cpp(std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters){
 	double stem_vol_f = 0;	
 	
 	double param0_tvl = species_parameters["param0_vol"];
@@ -287,7 +287,7 @@ double stem_vol_NSNorge_fun_cpp(std::string location, std::string dbh_class, dou
 	return stem_vol_f;
 }
 // [[Rcpp::export]]
-double stem_vol_SPNorge_fun_cpp(std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters){
+double stem_vol_SPNorway_fun_cpp(std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters){
 	double stem_vol_f = 0;	
 	
 	double param0_tvl = species_parameters["param0_vol"];
@@ -309,7 +309,7 @@ double stem_vol_SPNorge_fun_cpp(std::string location, std::string dbh_class, dou
 	return stem_vol_f;
 }
 // [[Rcpp::export]]
-double stem_vol_BINorge_fun_cpp(std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters){
+double stem_vol_BINorway_fun_cpp(std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters){
 	double stem_vol_f = 0;	
 	
 	double param0_tvl = species_parameters["param0_vol"];
@@ -324,44 +324,24 @@ double stem_vol_BINorge_fun_cpp(std::string location, std::string dbh_class, dou
 	return stem_vol_f;
 }
 // [[Rcpp::export]]
-double stem_vol_Norge_fun_cpp(std::string species, std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters) {
+double stem_vol_Norway_fun_cpp(std::string species, std::string location, std::string dbh_class, double dbh, double ht, Rcpp::NumericVector species_parameters) {
 	
 	double stem_vol_f = 0;	
 	
 	if(species == "NS"){
-		stem_vol_f = stem_vol_NSNorge_fun_cpp(location, dbh_class, dbh, ht, species_parameters);
+		stem_vol_f = stem_vol_NSNorway_fun_cpp(location, dbh_class, dbh, ht, species_parameters);
 	} else if(species == "SP"){
-		stem_vol_f = stem_vol_SPNorge_fun_cpp(location, dbh_class, dbh, ht, species_parameters);
+		stem_vol_f = stem_vol_SPNorway_fun_cpp(location, dbh_class, dbh, ht, species_parameters);
 	} else if(species == "BI"){
-		stem_vol_f = stem_vol_BINorge_fun_cpp(location, dbh_class, dbh, ht, species_parameters);
+		stem_vol_f = stem_vol_BINorway_fun_cpp(location, dbh_class, dbh, ht, species_parameters);
 	}
 	
 	return stem_vol_f;
 }
 
-
-// Finland stem volume equations
-// [[Rcpp::export]]
-double stem_vol_Finland_fun_cpp(double dbh, double ht, Rcpp::NumericVector species_parameters) {
-	
-	double stem_vol_f = 0;	
-	
-	double param0_tvl = species_parameters["param0_vol"];
-	double param1_tvl = species_parameters["param1_vol"];
-	double param2_tvl = species_parameters["param2_vol"];
-	double param3_tvl = species_parameters["param3_vol"];
-	double param4_tvl = species_parameters["param4_vol"];
-	
-	stem_vol_f = param0_tvl * pow(dbh, param1_tvl) * pow(param2_tvl, dbh) * pow(ht, param3_tvl) * pow(ht - 1.3, param4_tvl)/1000;
-	
-	return stem_vol_f;
-}
-
-
-
 // MAIN FUNCTION FOR DATA PREPARATION - ROUGHNESS METHOD
 // [[Rcpp::export]]
-Rcpp::List fg_rou_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters, std::string season = "winter",
+Rcpp::List fg_rou_dataprep_Norway_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters, std::string season = "winter",
 std::string country = "fgr"){
 	// 1. Check essentials (species, mean_ht&top_ht, mean_dbh, spacing):
 	//first step check that all the essential variables are present in the inputdata DataFrame
@@ -413,7 +393,7 @@ std::string country = "fgr"){
 	
 	// 2. Extract the desirable variables if they are present
 	// If a variable is not present, create it with default calculations, if present and contains NAs, we will replace the NAs with the default values
-	// fylke - the fylke is important for calculating appropriate stem volume. If not present it will be defaulted to alle
+	// fylke - the fylke ( = region) is important for calculating appropriate stem volume as the equations may differ. If not present it will be defaulted to alle
 	Rcpp::IntegerVector fylke;
 	fylke = extract_create_intcolumns_cpp("fylke", inputdata, n);
 	// create the location vector for the stem volume and crown dimension functions (only for NS, SP and BI)
@@ -537,12 +517,12 @@ std::string country = "fgr"){
 		std::string s_leaf = Rcpp::as<std::string>(leafstatus[i]);
 		// select the appropriate species_parameter row
 		// if the species is not present or the species 2-letter identifier not correct, display a message
-		try{Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);} catch (...) {
+		try{Rcpp::NumericVector sp_params = sp_params_Norway_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);} catch (...) {
 			std::cout << "This species is not present in the species_parameters dataframe or its 2-letter identifier is not correct." << std::endl;
 			return EXIT_FAILURE;
 		}
 		// if the species is other than NS, BI or SP, use the default fgr species parameters, otherwise use the country-specific ones
-		Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);
+		Rcpp::NumericVector sp_params = sp_params_Norway_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);
 		
 		// Fill in the variables
 		
@@ -554,7 +534,7 @@ std::string country = "fgr"){
 			mean_cr_width[i] = canopy_width_fun_cpp(sp_params["param0_cr_width"], sp_params["param1_cr_width"], mean_dbh[i]);
 			mean_cr_width[i] = std::round(mean_cr_width[i]/0.01)*0.01;}
 		if (Rcpp::NumericVector::is_na(mean_cr_depth[i])) {
-			mean_cr_depth[i] = canopy_depth_Norge_fun_cpp(s_species, sp_params, 10 * mean_dbh[i], 10 * top_ht[i], "stand");
+			mean_cr_depth[i] = canopy_depth_Norway_fun_cpp(s_species, sp_params, 10 * mean_dbh[i], 10 * top_ht[i], "stand");
 			if(mean_cr_depth[i] > mean_ht[i]){mean_cr_depth[i] = mean_ht[i];}
 			mean_cr_depth[i] = std::round(mean_cr_depth[i]/0.01)*0.01;}
 		if (Rcpp::IntegerVector::is_na(soil_group[i])) {soil_group[i] = 1;}
@@ -582,11 +562,7 @@ std::string country = "fgr"){
 		
 		if (Rcpp::NumericVector::is_na(stem_vol[i])) {
 			if(s_species == "BI" || s_species == "NS" || s_species == "SP"){
-				if(country == "Norge"){
-					stem_vol[i] = stem_vol_Norge_fun_cpp(s_species, s_location, s_dbhclass, mean_dbh[i], mean_ht[i], sp_params);
-				} else if(country == "Finland"){
-					stem_vol[i] = stem_vol_Finland_fun_cpp(mean_dbh[i], mean_ht[i], sp_params);
-				}
+				stem_vol[i] = stem_vol_Norway_fun_cpp(s_species, s_location, s_dbhclass, mean_dbh[i], mean_ht[i], sp_params);
 			} else {
 				stem_vol[i] = stem_vol_andretreslag_fun_cpp(s_species, mean_dbh[i], mean_ht[i], sp_params);
 			}
@@ -662,7 +638,7 @@ std::string country = "fgr"){
 
 // MAIN FUNCTION FOR DATA PREPARATION - TMC METHOD
 // [[Rcpp::export]]
-Rcpp::List fg_tmc_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters, std::string season = "winter",
+Rcpp::List fg_tmc_dataprep_Norway_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters, std::string season = "winter",
                                      std::string country = "fgr"){
 	// 1. Check essentials (stand_id, tree_id, species, tree_ht, dbh, spacing_current, stand_mean_dbh, stand_top_ht):
 	//first step check that all the essential variables are present in the inputdata DataFrame
@@ -894,21 +870,21 @@ Rcpp::List fg_tmc_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame 
 		std::string s_sleaf = Rcpp::as<std::string>(stand_leafstatus[i]);
 		// select the appropriate species_parameter row
 		// if the species is not present or the species 2-letter identifier not correct, display a message
-		try{Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);} catch (...) {
+		try{Rcpp::NumericVector sp_params = sp_params_Norway_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);} catch (...) {
 			std::cout << "This species is not present in the species_parameters dataframe or its 2-letter identifier is not correct." << std::endl;
 			return EXIT_FAILURE;
 		}
-		// if the species is other than NS, BI or SP, use the default fgr species parameters, otherwise use the NIBIO-Norge ones
-		Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);
+		// if the species is other than NS, BI or SP, use the default fgr species parameters, otherwise use the NIBIO-Norway ones
+		Rcpp::NumericVector sp_params = sp_params_Norway_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);
 		
 		
 		// select the appropriate species_parameter row for the surrounding trees - predominant species
 		// if the species is not present or the species 2-letter identifier not correct, display a message
-		try{Rcpp::NumericVector predomsp_params = sp_params_Scand_fun_cpp(species_parameters, s_predomsp, s_location, s_sdbhclass, s_sleaf);} catch (...) {
+		try{Rcpp::NumericVector predomsp_params = sp_params_Norway_fun_cpp(species_parameters, s_predomsp, s_location, s_sdbhclass, s_sleaf);} catch (...) {
 			std::cout << "This species is not present in the species_parameters dataframe or its 2-letter identifier is not correct." << std::endl;
 			return EXIT_FAILURE;
 		}
-		Rcpp::NumericVector predomsp_params = sp_params_Scand_fun_cpp(species_parameters, s_predomsp, s_location, s_sdbhclass, s_sleaf);
+		Rcpp::NumericVector predomsp_params = sp_params_Norway_fun_cpp(species_parameters, s_predomsp, s_location, s_sdbhclass, s_sleaf);
 		
 		// Calculate equivalent_mean_ht
 		equivalent_mean_ht[i] = eq_mean_ht_fun_cpp(stand_top_ht[i]);	
@@ -917,14 +893,14 @@ Rcpp::List fg_tmc_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame 
 			cr_width[i] = canopy_width_fun_cpp(sp_params["param0_cr_width"], sp_params["param1_cr_width"], dbh[i]);
 			cr_width[i] = std::round(cr_width[i]/0.01)*0.01;}
 		if (Rcpp::NumericVector::is_na(cr_depth[i])) {
-			cr_depth[i] = canopy_depth_Norge_fun_cpp(s_species, sp_params, 10 * dbh[i], 10 * tree_ht[i], "tree");
+			cr_depth[i] = canopy_depth_Norway_fun_cpp(s_species, sp_params, 10 * dbh[i], 10 * tree_ht[i], "tree");
 			if(cr_depth[i] > tree_ht[i]){cr_depth[i] = tree_ht[i];}
 			cr_depth[i] = std::round(cr_depth[i]/0.01)*0.01;}
 		if (Rcpp::NumericVector::is_na(stand_cr_width[i])) {
 			stand_cr_width[i] = canopy_width_fun_cpp(predomsp_params["param0_cr_width"], predomsp_params["param1_cr_width"], stand_mean_dbh[i]);
 			stand_cr_width[i] = std::round(stand_cr_width[i]/0.01)*0.01;}
 		if (Rcpp::NumericVector::is_na(stand_cr_depth[i])) {
-			stand_cr_depth[i] = canopy_depth_Norge_fun_cpp(s_predomsp, predomsp_params, 10 * stand_mean_dbh[i], 10 * equivalent_mean_ht[i], "stand");
+			stand_cr_depth[i] = canopy_depth_Norway_fun_cpp(s_predomsp, predomsp_params, 10 * stand_mean_dbh[i], 10 * equivalent_mean_ht[i], "stand");
 			if(stand_cr_depth[i] > equivalent_mean_ht[i]){stand_cr_depth[i] = equivalent_mean_ht[i];}
 			stand_cr_depth[i] = std::round(stand_cr_depth[i]/0.01)*0.01;}
 		if (Rcpp::IntegerVector::is_na(soil_group[i])) {soil_group[i] = 1;}
@@ -954,11 +930,7 @@ Rcpp::List fg_tmc_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame 
 		if (Rcpp::NumericVector::is_na(c_reg[i])) {c_reg[i] = sp_params["c_reg_" + soil_rd];}		
 		if (Rcpp::NumericVector::is_na(stem_vol[i])) {
 			if(s_species == "BI" || s_species == "NS" || s_species == "SP"){
-				if(country == "Norge"){
-					stem_vol[i] = stem_vol_Norge_fun_cpp(s_species, s_location, s_dbhclass, dbh[i], tree_ht[i], sp_params);
-				} else if(country == "Finland"){
-					stem_vol[i] = stem_vol_Finland_fun_cpp(dbh[i], tree_ht[i], sp_params);
-				}
+				stem_vol[i] = stem_vol_Norway_fun_cpp(s_species, s_location, s_dbhclass, dbh[i], tree_ht[i], sp_params);
 			} else {
 				stem_vol[i] = stem_vol_andretreslag_fun_cpp(s_species, dbh[i], tree_ht[i], sp_params);
 			}
@@ -1032,275 +1004,5 @@ Rcpp::List fg_tmc_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame 
 	Rcpp::_["snow_load"] = Rcpp::clone(snow_load), Rcpp::_["snow_weight"] = Rcpp::clone(snow_weight), 
 	Rcpp::_["max_stem_weight_warning"] = Rcpp::clone(max_stem_weight_warning));
 	
-	return output_data;
-}
-
-// MAIN FUNCTION FOR CSL DATA PREPARATION - ROUGHNESS
-// [[Rcpp::export]]
-Rcpp::DataFrame csl_rou_dataprep_Scand_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters){
-	// 1. Check essentials (species, mean_ht&top_ht, mean_dbh, spacing):
-	//first step check that all the essential variables are present in the inputdata DataFrame
-	//essential variables are the following: stand_id, species, mean_dbh
-	try
-	{
-		Rcpp::StringVector stand_id = inputdata["stand_id"];
-		Rcpp::StringVector species = inputdata["species"];
-		Rcpp::NumericVector mean_dbh = inputdata["mean_dbh"]; 
-	}
-	catch (...)
-	{
-		std::cout << "Missing some key variables! Check that stand_id, species, mean_dbh are in your dataframe"<<std::endl;
-		return EXIT_FAILURE;
-	}	
-	
-	// If all variables are present, load them
-	Rcpp::StringVector stand_id = inputdata["stand_id"];
-	Rcpp::StringVector species = inputdata["species"];
-	Rcpp::NumericVector mean_dbh = inputdata["mean_dbh"]; 
-	// Check if any of the variables contain NA	
-	Rcpp::LogicalVector stand_id_na = is_na(stand_id);
-	Rcpp::LogicalVector species_na = is_na(species);
-	Rcpp::LogicalVector mean_dbh_na = is_na(mean_dbh);
-	if(is_true(any(stand_id_na)) || is_true(any(species_na)) || 
-	is_true(any(mean_dbh_na))){
-		std::cout<<"One or more of the key variables contains NA! Check your input data"<<std::endl;
-		return EXIT_FAILURE;
-	}
-	// Get the length of the dataframe
-	int n = stand_id.size();
-	
-	// do the same for the height variables and check that they don't both contain NAs (i.e. they are both absent from the initial dataframe or they are present but missing
-	// data)
-	Rcpp::NumericVector top_ht = extract_create_numcolumns_cpp("top_ht", inputdata, n);
-	Rcpp::NumericVector mean_ht = extract_create_numcolumns_cpp("mean_ht", inputdata, n);
-	for (int i = 0; i < n; ++i){
-		bool top_ht_i_na = Rcpp::NumericVector::is_na(top_ht[i]);
-		bool mean_ht_i_na = Rcpp::NumericVector::is_na(mean_ht[i]);
-		if(top_ht_i_na && mean_ht_i_na){
-			std::cout<<"Both top_ht and mean_ht are missing in some/all stands, please check input data"<<std::endl;
-			return EXIT_FAILURE;
-		}
-	}
-	
-	// 2. Extract / Calculate the variables
-	// If a variable is not present, create it with default calculations, if present and contains NAs, we will replace the NAs with the default values
-	// mean_cr_width
-	Rcpp::NumericVector	mean_cr_width;
-	mean_cr_width = extract_create_numcolumns_cpp("mean_cr_width", inputdata, n);
-	// mean_cr_depth
-	Rcpp::NumericVector	mean_cr_depth;
-	mean_cr_depth = extract_create_numcolumns_cpp("mean_cr_depth", inputdata, n);	
-	// MOE
-	Rcpp::NumericVector	moe;
-	moe = extract_create_numcolumns_cpp("moe", inputdata, n);
-	// crown_density
-	Rcpp::NumericVector	crown_density;
-	crown_density = extract_create_numcolumns_cpp("crown_density", inputdata, n);
-	// crown_vol
-	Rcpp::NumericVector	crown_vol;
-	crown_vol = extract_create_numcolumns_cpp("crown_vol", inputdata, n);
-	
-	// create the location, dbh class and leafstatus vectors to extract the proper species_parameters later (only for NS, SP and BI)
-	// note that we don't use the stem volume equations to calculate the CSL, hence we don't actually need to extract the parameters for the right location and dbh_class
-	// hence they are set to default values here
-	Rcpp::StringVector location(n);
-	Rcpp::StringVector dbh_class(n);
-	Rcpp::StringVector leafstatus(n);
-	
-	for (int i = 0; i < n; ++i){
-		if(species[i] == "NS" || species[i] == "SP"){
-			location[i] = "annen";
-			dbh_class[i] = "liten";
-			leafstatus[i] = NA_STRING;
-		} else if(species[i] == "BI"){
-			location[i] = "alle";
-			dbh_class[i] = "alle";
-			leafstatus[i] = "ll";
-		}
-		else {
-			location[i] = NA_STRING;
-			dbh_class[i] = NA_STRING;
-			leafstatus[i] = NA_STRING;
-		}
-	}
-	
-		
-	//5. Replace the NA values with default calculations
-	for (int i = 0; i < n; ++i){
-		std::string s_species = Rcpp::as<std::string>(species[i]);
-		std::string s_location = Rcpp::as<std::string>(location[i]);
-		std::string s_dbhclass = Rcpp::as<std::string>(dbh_class[i]);
-		std::string s_leaf = Rcpp::as<std::string>(leafstatus[i]);
-		// select the appropriate species_parameter row
-		// if the species is not present or the species 2-letter identifier not correct, display a message
-		try{Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);} catch (...) {
-			std::cout << "This species is not present in the species_parameters dataframe or its 2-letter identifier is not correct." << std::endl;
-			return EXIT_FAILURE;
-		}
-		// if the species is other than NS, BI or SP, use the default fgr species parameters, otherwise use the NIBIO-Norge ones
-		Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);
-		
-		// Fill in the variables
-		if (Rcpp::NumericVector::is_na(top_ht[i])) {top_ht[i] = mean_ht_to_top_ht_cpp(sp_params["param0_height"], sp_params["param1_height"], mean_ht[i]);}
-		if (Rcpp::NumericVector::is_na(mean_ht[i])) {mean_ht[i] = top_ht_to_mean_ht_cpp(sp_params["param0_height"], sp_params["param1_height"], top_ht[i]);}
-		if (Rcpp::NumericVector::is_na(mean_cr_width[i])) {
-			mean_cr_width[i] = canopy_width_fun_cpp(sp_params["param0_cr_width"], sp_params["param1_cr_width"], mean_dbh[i]);			
-			mean_cr_width[i] = std::round(mean_cr_width[i]/0.01)*0.01;}
-		if (Rcpp::NumericVector::is_na(mean_cr_depth[i])) {
-			mean_cr_depth[i] = canopy_depth_Norge_fun_cpp(s_species, sp_params, 10 * mean_dbh[i], 10 * top_ht[i], "stand");
-			if(mean_cr_depth[i] > mean_ht[i]){mean_cr_depth[i] = mean_ht[i];}
-			mean_cr_depth[i] = std::round(mean_cr_depth[i]/0.01)*0.01;
-		}
-		if (Rcpp::NumericVector::is_na(moe[i])) {moe[i] = sp_params["moe"];}
-		if (Rcpp::NumericVector::is_na(crown_density[i])) {crown_density[i] = sp_params["canopy_density"];}					
-		if (Rcpp::NumericVector::is_na(crown_vol[i])) {crown_vol[i] = 1.0/3.0 * M_PI * mean_cr_depth[i] * pow(mean_cr_width[i]/2, 2);}		
-	}
-		
-	// crown weight
-	Rcpp::NumericVector crown_weight(n); 
-	crown_weight = crown_vol * crown_density;
-	// crown projected area:
-	Rcpp::NumericVector	mean_cr_prarea;
-	mean_cr_prarea = M_PI * pow((mean_cr_width/2.0), 2);
-	
-	Rcpp::DataFrame output_data;
-	output_data = Rcpp::DataFrame::create(Rcpp::_["stand_id"] = Rcpp::clone(stand_id), Rcpp::_["species"] = Rcpp::clone(species),
-	Rcpp::_["mean_dbh"] = Rcpp::clone(mean_dbh), Rcpp::_["mean_ht"] = Rcpp::clone(mean_ht), Rcpp::_["top_ht"] = Rcpp::clone(top_ht),
-	Rcpp::_["mean_cr_width"] = Rcpp::clone(mean_cr_width), Rcpp::_["mean_cr_depth"] = Rcpp::clone(mean_cr_depth),
-	Rcpp::_["mean_cr_prarea"] = Rcpp::clone(mean_cr_prarea), Rcpp::_["crown_density"] = Rcpp::clone(crown_density),  
-	Rcpp::_["crown_vol"] = Rcpp::clone(crown_vol), Rcpp::_["crown_weight"] = Rcpp::clone(crown_weight),
-	Rcpp::_["moe"] = Rcpp::clone(moe));
-		
-	return output_data;
-}
-
-
-
-// MAIN FUNCTION FOR CSL DATA PREPARATION - TMC
-// [[Rcpp::export]]
-Rcpp::DataFrame csl_tmc_dataprep_Norge_cpp(Rcpp::DataFrame inputdata, Rcpp::DataFrame fgr_constants, Rcpp::DataFrame species_parameters){
-	// 1. Check essentials (species, mean_ht&top_ht, mean_dbh, spacing):
-	//first step check that all the essential variables are present in the inputdata DataFrame
-	//essential variables are the following: stand_id, species, mean_dbh
-	try
-	{
-		Rcpp::StringVector stand_id = inputdata["stand_id"];
-		Rcpp::StringVector tree_id = inputdata["tree_id"];
-		Rcpp::StringVector species = inputdata["species"];
-		Rcpp::NumericVector tree_ht = inputdata["tree_ht"]; 
-		Rcpp::NumericVector dbh = inputdata["dbh"]; 
-	}
-	catch (...)
-	{
-		std::cout << "Missing some key variables! Check that stand_id, tree_id, species, tree_ht, dbh are in your dataframe"<<std::endl;
-		return EXIT_FAILURE;
-	}	
-	
-	// If all variables are present, load them
-	Rcpp::StringVector stand_id = inputdata["stand_id"];
-	Rcpp::StringVector tree_id = inputdata["tree_id"];
-	Rcpp::StringVector species = inputdata["species"];
-	Rcpp::NumericVector tree_ht = inputdata["tree_ht"]; 
-	Rcpp::NumericVector dbh = inputdata["dbh"]; 
-	// Check if any of the variables contain NA	
-	Rcpp::LogicalVector stand_id_na = is_na(stand_id);
-	Rcpp::LogicalVector tree_id_na = is_na(tree_id);
-	Rcpp::LogicalVector species_na = is_na(species);
-	Rcpp::LogicalVector tree_ht_na = is_na(tree_ht);
-	Rcpp::LogicalVector dbh_na = is_na(dbh);
-	if(is_true(any(stand_id_na)) || is_true(any(tree_id_na)) || is_true(any(species_na)) || is_true(any(tree_ht_na)) || 
-	is_true(any(dbh_na))){
-		std::cout<<"One or more of the key variables contains NA! Check your input data"<<std::endl;
-		return EXIT_FAILURE;
-	}
-	// Get the length of the dataframe
-	int n = stand_id.size();
-	
-	
-	// 2. Extract / Calculate the variables
-	// If a variable is not present, create it with default calculations, if present and contains NAs, we will replace the NAs with the default values
-	// cr_width
-	Rcpp::NumericVector	cr_width;
-	cr_width = extract_create_numcolumns_cpp("cr_width", inputdata, n);
-	// cr_depth
-	Rcpp::NumericVector	cr_depth;
-	cr_depth = extract_create_numcolumns_cpp("cr_depth", inputdata, n);	
-	// MOE
-	Rcpp::NumericVector	moe;
-	moe = extract_create_numcolumns_cpp("moe", inputdata, n);
-	// crown_density
-	Rcpp::NumericVector	crown_density;
-	crown_density = extract_create_numcolumns_cpp("crown_density", inputdata, n);
-	// crown_vol
-	Rcpp::NumericVector	crown_vol;
-	crown_vol = extract_create_numcolumns_cpp("crown_vol", inputdata, n);
-	
-	// create the location, dbh class and leafstatus vectors to extract the proper species_parameters later (only for NS, SP and BI)
-	// note that we don't use the stem volume equations to calculate the CSL, hence we don't actually need to extract the parameters for the right location and dbh_class
-	// hence they are set to default values here
-	Rcpp::StringVector location(n);
-	Rcpp::StringVector dbh_class(n);
-	Rcpp::StringVector leafstatus(n);
-	for (int i = 0; i < n; ++i){
-		if(species[i] == "NS" || species[i] == "SP"){
-			location[i] = "annen";
-			dbh_class[i] = "liten";
-			leafstatus[i] = NA_STRING;
-		} else if(species[i] == "BI"){
-			location[i] = "alle";
-			dbh_class[i] = "alle";
-			leafstatus[i] = "ll";
-		}
-		else {
-			location[i] = NA_STRING;
-			dbh_class[i] = NA_STRING;
-			leafstatus[i] = NA_STRING;
-		}
-	}
-	
-	//5. Replace the NA values with default calculations
-	for (int i = 0; i < n; ++i){
-		std::string s_species = Rcpp::as<std::string>(species[i]);
-		std::string s_location = Rcpp::as<std::string>(location[i]);
-		std::string s_dbhclass = Rcpp::as<std::string>(dbh_class[i]);
-		std::string s_leaf = Rcpp::as<std::string>(leafstatus[i]);
-		// select the appropriate species_parameter row
-		// if the species is not present or the species 2-letter identifier not correct, display a message
-		try{Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);} catch (...) {
-			std::cout << "This species is not present in the species_parameters dataframe or its 2-letter identifier is not correct." << std::endl;
-			return EXIT_FAILURE;
-		}
-		// if the species is other than NS, BI or SP, use the default fgr species parameters, otherwise use the NIBIO-Norge ones
-		Rcpp::NumericVector sp_params = sp_params_Scand_fun_cpp(species_parameters, s_species, s_location, s_dbhclass, s_leaf);
-		
-		// Fill in the variables
-		if (Rcpp::NumericVector::is_na(cr_width[i])) {
-			cr_width[i] = canopy_width_fun_cpp(sp_params["param0_cr_width"], sp_params["param1_cr_width"], dbh[i]);
-			cr_width[i] = std::round(cr_width[i]/0.01)*0.01;
-		if (Rcpp::NumericVector::is_na(cr_depth[i])) {
-			cr_depth[i] = canopy_depth_Norge_fun_cpp(s_species, sp_params, 10 * dbh[i], 10 * tree_ht[i], "tree");
-			if(cr_depth[i] > tree_ht[i]){cr_depth[i] = tree_ht[i];}
-			cr_depth[i] = std::round(cr_depth[i]/0.01)*0.01;}
-		}	
-		if (Rcpp::NumericVector::is_na(moe[i])) {moe[i] = sp_params["moe"];}
-		if (Rcpp::NumericVector::is_na(crown_density[i])) {crown_density[i] = sp_params["canopy_density"];}						
-		if (Rcpp::NumericVector::is_na(crown_vol[i])) {crown_vol[i] = 1.0/3.0 * M_PI * cr_depth[i] * pow(cr_width[i]/2, 2);}
-	}
-		
-	// crown weight
-	Rcpp::NumericVector crown_weight(n); 
-	crown_weight = crown_vol * crown_density;
-	// crown projected area:
-	Rcpp::NumericVector	cr_prarea;
-	cr_prarea = M_PI * pow((cr_width/2.0), 2);
-	
-	Rcpp::DataFrame output_data;
-	output_data = Rcpp::DataFrame::create(Rcpp::_["stand_id"] = Rcpp::clone(stand_id), Rcpp::_["tree_id"] = Rcpp::clone(tree_id), 
-	Rcpp::_["species"] = Rcpp::clone(species), Rcpp::_["dbh"] = Rcpp::clone(dbh), Rcpp::_["tree_ht"] = Rcpp::clone(tree_ht), 
-	Rcpp::_["cr_width"] = Rcpp::clone(cr_width), Rcpp::_["cr_depth"] = Rcpp::clone(cr_depth),
-	Rcpp::_["cr_prarea"] = Rcpp::clone(cr_prarea), Rcpp::_["crown_density"] = Rcpp::clone(crown_density),
-	Rcpp::_["crown_vol"] = Rcpp::clone(crown_vol), Rcpp::_["crown_weight"] = Rcpp::clone(crown_weight),
-	 Rcpp::_["moe"] = Rcpp::clone(moe));
-		
 	return output_data;
 }
