@@ -97,3 +97,21 @@ for tile_id in ${tile_id_array[@]}; do
   echo "${script_for_tile} -tile_id ${tile_id} -tmp_dir ${tmp_dir} -raster_tiles ${raster_tiles} -layer ${layer} -height_vrt ${treeht_vrt} -nbtrees_vrt ${treenb_vrt} -find_gaps_and_distances_command ${find_gaps_and_distances_command} -gap_height ${gap_height} -min_nbtree ${min_nbtree} -max_distance ${max_distance} -border_length ${border_length} -save_prefix ${save_prefix} -save_dir ${save_tile_dir} -utm_epsg ${utm_epsg} > ${tile_single_log_file} 2>&1" >> "${gnu_parallel_file}"
 
 done
+gnu_parallel_log_file="${log_dir}/find_gaps_and_distances_gnu_parallel.log"
+# We run the commands which are stored in a text file. Each text line is read as a command, and we do so in parallel using the 20 CPUs
+time parallel --verbose --progress -j ${bash_processes} :::: ${gnu_parallel_file} > ${gnu_parallel_log_file} 2>&1
+
+# We build a VRT with all the created tile raster files for the distance to the forest edge and the size of the forest gap in the four cardinal directions using GDAL.
+for direction in east west south north; do
+
+  gdalbuildvrt -overwrite \
+               "${save_dir}/${direction}_gap_distance.vrt" \
+               "${save_tile_dir}/tile_"*"${direction}_gap_distance.tif"
+
+  gdalbuildvrt -overwrite \
+               "${save_dir}/${direction}_gap_size.vrt" \
+               "${save_tile_dir}/tile_"*"${direction}_gap_size.tif"
+
+done
+
+exit 0
