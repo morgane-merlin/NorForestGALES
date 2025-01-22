@@ -10,13 +10,15 @@ date_readable=$(date -u +%Y%m%d_%H%M%S%Z)
 # We set up the variables which are required
 tile_id=""
 tmp_dir=""
-msnfi_tiles=""
+raster_tiles=""
 layer=""
 height_vrt=""
+nbtrees_vrt=""
 # script
 find_gaps_and_distances_command=""
 # parameters
 gap_height=""
+min_nbtree=""
 max_distance=""
 border_length=""
 save_prefix=""
@@ -41,9 +43,9 @@ while [ $i -lt $# ]; do
     let i=i+1
     tmp_dir=${args[i]}
 
-  elif [ "${args[i]}" = "-msnfi_tiles" ]; then
+  elif [ "${args[i]}" = "-raster_tiles" ]; then
     let i=i+1
-    msnfi_tiles=${args[i]}
+    raster_tiles=${args[i]}
 
   elif [ "${args[i]}" = "-layer" ]; then
     let i=i+1
@@ -53,6 +55,10 @@ while [ $i -lt $# ]; do
     let i=i+1
     height_vrt=${args[i]}
 
+  elif [ "${args[i]}" = "-nbtrees_vrt" ]; then
+    let i=i+1
+    nbtrees_vrt=${args[i]}
+
   elif [ "${args[i]}" = "-find_gaps_and_distances_command" ]; then
     let i=i+1
     find_gaps_and_distances_command=${args[i]}
@@ -60,6 +66,10 @@ while [ $i -lt $# ]; do
   elif [ "${args[i]}" = "-gap_height" ]; then
     let i=i+1
     gap_height=${args[i]}
+
+  elif [ "${args[i]}" = "-min_nbtree" ]; then
+    let i=i+1
+    min_nbtree=${args[i]}
 
   elif [ "${args[i]}" = "-max_distance" ]; then
     let i=i+1
@@ -91,11 +101,13 @@ done
 # We check if all variables are present, and if not we print out the list of variables to find which one was missing
 if [ -z "$tile_id" ] \
        || [ -z "$tmp_dir" ] \
-       || [ -z "${msnfi_tiles}" ] \
+       || [ -z "${raster_tiles}" ] \
        || [ -z "${layer}" ] \
        || [ -z "${height_vrt}" ] \
+       || [ -z "${nbtrees_vrt}" ] \
        || [ -z "$find_gaps_and_distances_command" ] \
        || [ -z "${gap_height}" ] \
+       || [ -z "${min_nbtree}" ] \
        || [ -z "${max_distance}" ] \
        || [ -z "${border_length}" ] \
        || [ -z "${save_prefix}" ] \
@@ -105,12 +117,14 @@ if [ -z "$tile_id" ] \
   echo "ERROR: find_gaps_and_distances_for_tile.sh failed, argument(s) missing"
   echo "tile_id: ${tile_id}"
   echo "tmp_dir: ${tmp_dir}"
-  echo "msnfi_tiles: ${msnfi_tiles}"
+  echo "raster_tiles: ${raster_tiles}"
   echo "layer: ${layer}"
   echo "height_vrt: ${height_vrt}"
+  echo "nbtrees_vrt: ${nbtrees_vrt}"
   echo "find_gaps_and_distances_command: ${find_gaps_and_distances_command}"
   echo "gap_height: ${gap_height}"
   echo "max_distance: ${max_distance}"
+  echo "min_nbtree: ${min_nbtree}"
   echo "border_length: ${border_length}"
   echo "save_prefix: ${save_prefix}"
   echo "save_dir: ${save_dir}"
@@ -157,6 +171,20 @@ gdal_translate -projwin ${ulx_uly_lrx_lry} \
                -co "TILED=YES" \
                -co "BIGTIFF=YES" \
                "${height_vrt}" "${height_tif}"
+               
+nbtrees_tif="${tmp_dir}/nbtrees_r_id_${rute_id}.tif"
+
+if [ -f "${nbtrees_tif}" ]; then
+  rm "${nbtrees_tif}"
+fi
+
+gdal_translate -projwin ${ulx_uly_lrx_lry} \
+               -b 1 \
+               -a_srs "EPSG:${utm_epsg}" \
+               -co "COMPRESS=DEFLATE" \
+               -co "TILED=YES" \
+               -co "BIGTIFF=YES" \
+               "${nbtrees_vrt}" "${nbtrees_tif}"
 
 # This part adds a constraint on the number of trees to decide whether a pixel is considered as a forest or non-forest = gap
 fixed_height_tif="${tmp_dir}/fixed_height_r_id_${tile_id}.tif"
@@ -165,13 +193,13 @@ if [ -f "${fixed_height_tif}" ]; then
 fi
 gdal_calc.py --type='Float32' --quiet \
              -A "${height_tif}" \
-             -B "${treantall_tif}" \
+             -B "${nbtrees_tif}" \
              --outfile="${fixed_height_tif}" \
              --co "COMPRESS=DEFLATE" \
              --co "TILED=YES" \
              --co "BIGTIFF=YES" \
              --NoDataValue="${fixed_height_nodata_value}" \
-             --calc "(A * (B >= ${min_treantall_forest}))"
+             --calc "(A * (B >= ${min_nbtree}))"
 if [ -f "${height_tif}" ]; then
   rm "${height_tif}"
 fi
