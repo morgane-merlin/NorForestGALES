@@ -140,7 +140,7 @@ if [ -f "${tmp_dir}/bbox_${tile_id}.json" ]; then
 fi
 
 # We subset the full tree height raster to the tile of interest
-echo "creating msnfi_meanht..."
+echo "creating meanht..."
 height_tif="${tmp_dir}/height_r_id_${tile_id}.tif"
 # if it already exists for the tile, we remove it
 if [ -f "${height_tif}" ]; then
@@ -158,38 +158,38 @@ gdal_translate -projwin ${ulx_uly_lrx_lry} \
                -co "BIGTIFF=YES" \
                "${height_vrt}" "${height_tif}"
 
-# This part would be required if we add a constraint on the number of trees to decide whether a pixel is considered as a forest or non-forest = gap
-#fixed_height_tif="${tmp_dir}/fixed_height_r_id_${tile_id}.tif"
-#if [ -f "${fixed_height_tif}" ]; then
-#  rm "${fixed_height_tif}"
-#fi
-#gdal_calc.py --type='Float32' --quiet \
-#             -A "${height_tif}" \
-#             -B "${treantall_tif}" \
-#             --outfile="${fixed_height_tif}" \
-#             --co "COMPRESS=DEFLATE" \
-#             --co "TILED=YES" \
-#             --co "BIGTIFF=YES" \
-#             --NoDataValue="${fixed_height_nodata_value}" \
-#             --calc "(A * (B >= ${min_treantall_forest}))"
-#if [ -f "${height_tif}" ]; then
-#  rm "${height_tif}"
-#fi
+# This part adds a constraint on the number of trees to decide whether a pixel is considered as a forest or non-forest = gap
+fixed_height_tif="${tmp_dir}/fixed_height_r_id_${tile_id}.tif"
+if [ -f "${fixed_height_tif}" ]; then
+  rm "${fixed_height_tif}"
+fi
+gdal_calc.py --type='Float32' --quiet \
+             -A "${height_tif}" \
+             -B "${treantall_tif}" \
+             --outfile="${fixed_height_tif}" \
+             --co "COMPRESS=DEFLATE" \
+             --co "TILED=YES" \
+             --co "BIGTIFF=YES" \
+             --NoDataValue="${fixed_height_nodata_value}" \
+             --calc "(A * (B >= ${min_treantall_forest}))"
+if [ -f "${height_tif}" ]; then
+  rm "${height_tif}"
+fi
 
 tile_save_prefix="${save_prefix}_${tile_id}"
 
 # We run the find_gaps_and_distances algorithm using the tree height tile raster and the other parameters supplied in the input
 "${find_gaps_and_distances_command}" \
-                       -height_tif "${height_tif}" \
+                       -height_tif "${fixed_height_tif}" \
                        -gap_height "${gap_height}" \
                        -max_distance "${max_distance}" \
                        -border_length "${border_length}" \
                        -save_prefix "${tile_save_prefix}" \
                        -save_dir "${save_dir}"
 
-#if [ -f "${fixed_height_tif}" ]; then
-#  rm "${fixed_height_tif}"
-#fi
+if [ -f "${fixed_height_tif}" ]; then
+  rm "${fixed_height_tif}"
+fi
 
 # Finally, we add overviews to the created rasters of distance to the edge (gap_distance) and size of the gap (gap_size) for each tile
 for direction in east west south north; do
