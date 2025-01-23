@@ -10,7 +10,7 @@ Some variables other than the ones commonly found in forest attribute rasters ar
 - a soil type and rooting depth classification according to the ForestGALES model. A simple translation can be made from national soil type maps to the soil and rooting depth classification from ForestGALES. The output data needs to be extractable for each forest pixel.
 - the distance to forest edge and size of the upwind gap for each forest pixel - see the forest-edge-gaps folder.
 - (optional: crown snow load for a winter scenario - the script is then appropriately modified to include this extra raster).
-- Parameter files: the ForestGALES general parameters and the species-specific parameter files are 
+- Parameter files: the ForestGALES general parameters and the species-specific parameter files are fgr_constants_1.txt and species_parameters_1.txt
 
 ## Scripts & routine
 The scripts work at the tile level. The Critical Wind Speed for each forest pixel is calculated in parallel with the find_CWS_Norway.sh which uses find_CWS_for_tile.sh. The find_CWS_for_tile.sh relies on the R script FGrou_CWS_SR16.R  
