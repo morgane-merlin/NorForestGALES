@@ -1,0 +1,2 @@
+ro_default	grav	snow_density_default	u_a	u_c1	u_c2	u_c3	u_c4	dams_to_weibull_a1	dams_to_weibull_a2	cs	cr	k	cd1	cw	tree_heights_inside_forest	gfadj	maximum_gap_size	wind_precision	dlf	dlf_threshold	n	an	bn	cn
+1.2226	9.81	150	5	-0.5903	4.4345	-11.8633	13.569	-0.9626	0.4279	0.003	0.3	0.4	7.5	2	9	1	10	0.5	1.00E+09	1.00E+09	0.6	-1.4	-0.4	0.6
