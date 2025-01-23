@@ -1,3 +1,6 @@
+Date: 23/01/2025
+
+# Description
 This code calculates the distance to the forest edge and the size of the upwind gap for each individual forest pixel in a forest raster, in the four cardinal directions. A suite of requirements are chosen and applied in the code to discard forest pixels with insufficient number of trees, small tree height, and to limit the distance over which the forest edge is searched for, and to discard forest pixels. Note that some parameters should be adjusted to your own settings.
 
 The gap size and distance to gap is calculated in parallel with the find_gaps_and_distances.sh which uses find_gaps_and_distances_for_tile.sh relying on the c++ program that currently is named find_gaps_and_distances.
