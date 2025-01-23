@@ -15,7 +15,8 @@ The repository contains:
 2. a folder with the two main scripts translating the fgr functions written in C/R into C++.
 3. a folder with the scripts invoking the new C++ functions for parallel processing in a Linux High Performance Computing cluster
 
-The main script here: xxx.sh allows for sequentially running the scripts for obtaining the distance to the forest edge and size of the upwind gap and the scripts for obtaining the Critical Wind Speed in a single operation.
+## Routine
+The find_gaps_and_distances.sh script from the forest-edge-gaps can be run first, then the find_CWS_Norway.sh script from the CWS_Calculation can be run after. Or the two can be combined in a single script which calls on them sequentially.
 
 ## License
 GPLv3 following the licensing of ForestGALES/fgr.
