@@ -12,7 +12,8 @@ Some variables other than the ones commonly found in forest attribute rasters ar
 - (optional: crown snow load for a winter scenario - the script is then appropriately modified to include this extra raster).
 
 ## Scripts & routine
-The scripts work at the tile level. The Critical Wind Speed for each forest pixel is calculated in parallel with the find_CWS.sh which uses find_CWS_for_tile.sh. The find_CWS_for_tile.sh relies on the R script FGrou_CWS_SR16.R
+The scripts work at the tile level. The Critical Wind Speed for each forest pixel is calculated in parallel with the find_CWS_Norway.sh which uses find_CWS_for_tile.sh. The find_CWS_for_tile.sh relies on the R script FGrou_CWS_SR16.R  
+
 
 
 Step 5: TO DO

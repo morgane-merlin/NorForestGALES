@@ -44,10 +44,10 @@ dist_edge_E=rast(args[12])
 gap_size_E=rast(args[13])
 dist_edge_W=rast(args[14])
 gap_size_W=rast(args[15])
-dist_edge_S=rast(args[16])
-gap_size_S=rast(args[17])
-dist_edge_N=rast(args[18])
-gap_size_N=rast(args[19])
+dist_edge_N=rast(args[16])
+gap_size_N=rast(args[17])
+dist_edge_S=rast(args[18])
+gap_size_S=rast(args[19])
 # the seasonal scenario considered
 season=args[20]
 # the directory to save the files
@@ -167,92 +167,25 @@ for(direction in c("E", "N", "S", "W")){
   # we use the second RCpp function
   forest.CWS <- fg_rou_nibio_cpp(forest.dataprep, fgr_constants = fgr_constants_FNFI, species_parameters = species_params, breakage_basecanopy = "no")$results
   setDT(forest.CWS)
-  # Convert the character variables to numbers
+  # Convert the character variables (damage factor) to numbers using the damage factor coding
   forest.CWS <- merge(forest.CWS, damage.factors, by = "mode_of_damage", all.x = T, all.y = F)
-  rm(forest.dataprep)
-  gc()
+  rm(forest.dataprep) # we clear the data preparation datatable
+  gc() # we clear the memory
   # > Saving files ####
   message(" -- Saving files --")
-  # Merge the CWS with the coordinates of the cell
+  # Merge the CWS with the datatable containing the coordinates of the cells
   forest.CWS.f <- merge(forest.CWS[, stand_id := as.numeric(stand_id)], forest.sel.loc, by.x = "stand_id", by.y = "cell", all = T)
-  # Get full coverage for the coordinates -- only perhaps for small dataframes - technically the problem arises only for tiles 558_396 & 582_396 with 12 and 3 pixels respectively
-  # also applies for two more tiles where only one pixel was found so need to expand a bit to be able to create a raster - tiles 446_228 & 590_380 & 518_316 & 574_404
+  # Get full coverage for the coordinates -- only perhaps for small datatables - technically the problem arises only for some tiles only to create a raster
   if(length(forest.CWS.f$x)<=15){
     xyfull <- setDT(expand.grid(x = seq(min(forest.sel.loc$x), max(forest.sel.loc$x)+16, 16),
                                 y = seq(min(forest.sel.loc$y), max(forest.sel.loc$y)+16, 16)))
     forest.CWS.f <- merge(forest.CWS.f, xyfull, by = c("x", "y"), all = T)
   }
+  # Convert the datatables to a raster
   forest.CWS.f <- terra::rast(forest.CWS.f[, c("x", "y", "u_elev_damage", "damage.factor", "u_elev_b", "u_elev_o")], type = "xyz", crs = "epsg:32632")
+  # Write the CWS tile raster out
   terra::writeRaster(forest.CWS.f, filename = paste0(output_name, ".tif"), filetype = "GTiff", overwrite = TRUE, gdal = c("COMPRESS=DEFLATE", "TFW=YES"))
+  # Clear the environment
   rm(forest.CWS, forest.CWS.f)
   gc()
 }
-
-
-#Loop through the four directions
-for(gap_rasters in list(gap_rasters_E, gap_rasters_W, gap_rasters_N, gap_rasters_S)){
-dist_edge <- rast(gap_rasters[1])
-gap_size <- rast(gap_rasters[2])
-# get direction
-direction <- toupper(substr(names(dist_edge), 1, 1))
-message(paste0("Direction - ", direction))
-# prepare output file name
-output_name <- paste0(save_dir, "/", save_prefix, tile_id, "_", direction)
-# crop the rasters to the extent of the fylketile and other SR16 rasters
-d_e <- crop(dist_edge, ext(sp))
-g_s <- crop(gap_size, ext(sp))
-
-rm(dist_edge, gap_size)
-
-# select the mean height, top height and mean DBH for each forest cell based on the dominant species
-forest.sel <- c(sp, mht, mdbh, tht, nt, ba, s_g, root, d_e, g_s, fylke) 
-names(forest.sel) <- c("species", "mean_ht", "mean_dbh", "top_ht", "N8", "BA5", "soil_group", "rooting", "dist_edge", "gap_size", "fylke")
-if(exists("snow.r")){
-forest.sel <- c(forest.sel, snow.r)
-names(forest.sel) <- c("species", "mean_ht", "mean_dbh", "top_ht", "N8", "BA5", "soil_group", "rooting", "dist_edge", "gap_size", "fylke", "snow_load")
-}
-forest.sel <- as.data.frame(forest.sel, xy = T, cells = T)
-setDT(forest.sel)
-setkey(forest.sel, cell, x, y)
-message(" -- Forest data preparation --")
-# remove the pixels with no trees - clearcuts and pixels with no mean_dbh
-forest.sel <- forest.sel[mean_ht > 100 & !is.na(mean_dbh) & species != 0 & N8 >= 400,][!(N8 == 0 & BA5 == 0),]
-if(nrow(forest.sel)== 0){
-message("No data in this tile fits the requirements in height and/or number of trees")
-exit()}
-
-# replace the odd values in soil_group and rooting (-999 which may come from different overlaps between soil raster and SR16 in which pixels might land on land or not)
-forest.sel[, `:=` (soil_group = nafill(soil_group, type = "locf"), rooting = nafill(rooting, type = "locf")), by = y]
-forest.sel[, `:=` (species = fcase(species == 1, "NS",species == 2, "SP",species == 3, "BI"),
-mean_ht = mean_ht/10, top_ht = top_ht/10, stand_id = cell, 
-spacing = round(fifelse(N8 == 0, 1/sqrt((BA5/(pi*(mean_dbh/2)^2))/10000), 1/sqrt(N8/10000)), 1))]
-forest.sel.loc <- copy(forest.sel)[, c("cell", "x", "y")]
-forest.sel.f <- copy(forest.sel)[, c("stand_id", "fylke", "species", "mean_dbh", "top_ht", "mean_ht", "spacing", "soil_group", "rooting", "dist_edge", "gap_size")]
-if(exists("snow.r")){
-forest.sel.f <- copy(forest.sel)[, c("stand_id", "fylke", "species", "mean_dbh", "top_ht", "mean_ht", "spacing", "soil_group", "rooting", "dist_edge", "gap_size", "snow_load")]
-}
-forest.dataprep <- fg_rou_dataprep_Norge_cpp(forest.sel.f, fgr_constants = fgr_constants_nibio, species_parameters = sp_params.sr16, season = season)
-
-# Calculate the critical wind speed 
-message(" -- Critical Wind Speed Calculation --")
-forest.CWS <- fg_rou_nibio_cpp(forest.dataprep, fgr_constants = fgr_constants_nibio, species_parameters = sp_params.sr16, breakage_basecanopy = "no")$results
-setDT(forest.CWS)
-# Convert the character variables to numbers
-forest.CWS <- merge(forest.CWS, damage.factors, by = "mode_of_damage", all.x = T, all.y = F)
- 
-# > Saving files ####
-message(" -- Saving files --")
-# Merge the CWS with the coordinates of the cell
-forest.CWS.f <- merge(forest.CWS[, stand_id := as.numeric(stand_id)], forest.sel.loc, by.x = "stand_id", by.y = "cell", all = T)
-# Get full coverage for the coordinates -- only perhaps for small dataframes - technically the problem arises only for tiles 558_396 & 582_396 with 12 and 3 pixels respectively
-# also applies for two more tiles where only one pixel was found so need to expand a bit to be able to create a raster - tiles 446_228 & 590_380 & 518_316 & 574_404
-if(length(forest.CWS.f$x)<=15){
-xyfull <- setDT(expand.grid(x = seq(min(forest.sel.loc$x), max(forest.sel.loc$x)+16, 16),
-y = seq(min(forest.sel.loc$y), max(forest.sel.loc$y)+16, 16)))
-forest.CWS.f <- merge(forest.CWS.f, xyfull, by = c("x", "y"), all = T)
-}
-forest.CWS.f <- terra::rast(forest.CWS.f[, c("x", "y", "u_elev_damage", "damage.factor", "u_elev_b", "u_elev_o")], type = "xyz", crs = "epsg:25833")
-terra::writeRaster(forest.CWS.f, filename = paste0(output_name, ".tif"), filetype = "GTiff", overwrite = TRUE, gdal = c("COMPRESS=DEFLATE", "TFW=YES"))
-}
-rm(list = ls())
-gc()

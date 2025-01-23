@@ -1,29 +1,30 @@
 #!/bin/bash
 echo --$(date +%FT%T%z)--
-
+# We set up the date and time
 date_str="$(date -u +%Y%m%d)"
 date_seconds=$(date +%s)
 date_readable=$(date -u +%Y%m%d_%H%M%S%Z)
 
+# We set up the variables which are required
 tile_id=""
 dir_0=""
-sr16_sp=""
-sr16_mht=""
-sr16_mdbh=""
-sr16_tht=""
-sr16_nt=""
-sr16_ba=""
-sr16_distE=""
-sr16_gapE=""
-sr16_distW=""
-sr16_gapW=""
-sr16_distN=""
-sr16_gapN=""
-sr16_distS=""
-sr16_gapS=""
-sr16_soilgroup=""
-sr16_rooting=""
-sr16_tiles=""
+raster_sp=""
+raster_mht=""
+raster_mdbh=""
+raster_tht=""
+raster_nt=""
+raster_ba=""
+raster_distE=""
+raster_gapE=""
+raster_distW=""
+raster_gapW=""
+raster_distN=""
+raster_gapN=""
+raster_distS=""
+raster_gapS=""
+raster_soilgroup=""
+raster_rooting=""
+raster_tiles=""
 
 # script
 find_CWS_command=""
@@ -33,6 +34,8 @@ save_prefix=""
 save_dir=""
 season=""
 
+# Each of those variables was included as an argument to this bash command, so we get the arguments, and we assign them to the variable
+# Note that the names need to match, between the names given to the arguments in the tile_command_gapedges.sh and the names of the variables described just above
 args=("$@")
 
 i=0
@@ -44,57 +47,57 @@ while [ $i -lt $# ]; do
 	elif [ "${args[i]}" = "-dir_0" ]; then
 		let i=i+1
 	dir_0=${args[i]}
-	elif [ "${args[i]}" = "-sr16_sp" ]; then
+	elif [ "${args[i]}" = "-raster_sp" ]; then
 		let i=i+1
-	sr16_sp=${args[i]}
-	elif [ "${args[i]}" = "-sr16_mht" ]; then
+	raster_sp=${args[i]}
+	elif [ "${args[i]}" = "-raster_mht" ]; then
 		let i=i+1
-	sr16_mht=${args[i]}
-	elif [ "${args[i]}" = "-sr16_mdbh" ]; then
+	raster_mht=${args[i]}
+	elif [ "${args[i]}" = "-raster_mdbh" ]; then
 		let i=i+1
-	sr16_mdbh=${args[i]}
-	elif [ "${args[i]}" = "-sr16_tht" ]; then
+	raster_mdbh=${args[i]}
+	elif [ "${args[i]}" = "-raster_tht" ]; then
 		let i=i+1
-	sr16_tht=${args[i]}
-	elif [ "${args[i]}" = "-sr16_nt" ]; then
+	raster_tht=${args[i]}
+	elif [ "${args[i]}" = "-raster_nt" ]; then
 		let i=i+1
-	sr16_nt=${args[i]}
-	elif [ "${args[i]}" = "-sr16_ba" ]; then
+	raster_nt=${args[i]}
+	elif [ "${args[i]}" = "-raster_ba" ]; then
 		let i=i+1
-	sr16_ba=${args[i]}
-	elif [ "${args[i]}" = "-sr16_distE" ]; then
+	raster_ba=${args[i]}
+	elif [ "${args[i]}" = "-raster_distE" ]; then
 		let i=i+1
-	sr16_distE=${args[i]}
-	elif [ "${args[i]}" = "-sr16_gapE" ]; then
+	raster_distE=${args[i]}
+	elif [ "${args[i]}" = "-raster_gapE" ]; then
 		let i=i+1
-	sr16_gapE=${args[i]}
-	elif [ "${args[i]}" = "-sr16_distW" ]; then
+	raster_gapE=${args[i]}
+	elif [ "${args[i]}" = "-raster_distW" ]; then
 		let i=i+1
-	sr16_distW=${args[i]}
-	elif [ "${args[i]}" = "-sr16_gapW" ]; then
+	raster_distW=${args[i]}
+	elif [ "${args[i]}" = "-raster_gapW" ]; then
 		let i=i+1
-	sr16_gapW=${args[i]}
-	elif [ "${args[i]}" = "-sr16_distN" ]; then
+	raster_gapW=${args[i]}
+	elif [ "${args[i]}" = "-raster_distN" ]; then
 		let i=i+1
-	sr16_distN=${args[i]}
-	elif [ "${args[i]}" = "-sr16_gapN" ]; then
+	raster_distN=${args[i]}
+	elif [ "${args[i]}" = "-raster_gapN" ]; then
 		let i=i+1
-	sr16_gapN=${args[i]}
-	elif [ "${args[i]}" = "-sr16_distS" ]; then
+	raster_gapN=${args[i]}
+	elif [ "${args[i]}" = "-raster_distS" ]; then
 		let i=i+1
-	sr16_distS=${args[i]}
-	elif [ "${args[i]}" = "-sr16_gapS" ]; then
+	raster_distS=${args[i]}
+	elif [ "${args[i]}" = "-raster_gapS" ]; then
 		let i=i+1
-	sr16_gapS=${args[i]}
-	elif [ "${args[i]}" = "-sr16_soilgroup" ]; then
+	raster_gapS=${args[i]}
+	elif [ "${args[i]}" = "-raster_soilgroup" ]; then
 		let i=i+1
-	sr16_soilgroup=${args[i]}
-	elif [ "${args[i]}" = "-sr16_rooting" ]; then
+	raster_soilgroup=${args[i]}
+	elif [ "${args[i]}" = "-raster_rooting" ]; then
 		let i=i+1
-	sr16_rooting=${args[i]}
-	elif [ "${args[i]}" = "-sr16_tiles" ]; then
+	raster_rooting=${args[i]}
+	elif [ "${args[i]}" = "-raster_tiles" ]; then
 		let i=i+1
-	sr16_tiles=${args[i]}
+	raster_tiles=${args[i]}
 	elif [ "${args[i]}" = "-find_CWS_command" ]; then
 		let i=i+1
 	find_CWS_command=${args[i]}
@@ -113,25 +116,26 @@ while [ $i -lt $# ]; do
 	fi
 	let i=i+1
 done
+# We check if all variables are present, and if not we print out the list of variables to find which one was missing
 if [ -z "$tile_id" ] \
 	|| [ -z "$dir_0" ] \
-	|| [ -z "${sr16_sp}" ] \
-	|| [ -z "${sr16_mht}" ] \
-	|| [ -z "${sr16_mdbh}" ] \
-	|| [ -z "${sr16_tht}" ] \
-	|| [ -z "${sr16_nt}" ] \
-	|| [ -z "${sr16_ba}" ] \
-	|| [ -z "${sr16_distE}" ] \
-	|| [ -z "${sr16_gapE}" ] \
-	|| [ -z "${sr16_distW}" ] \
-	|| [ -z "${sr16_gapW}" ] \
-	|| [ -z "${sr16_distN}" ] \
-	|| [ -z "${sr16_gapN}" ] \
-	|| [ -z "${sr16_distS}" ] \
-	|| [ -z "${sr16_gapS}" ] \
-	|| [ -z "${sr16_soilgroup}" ] \
-	|| [ -z "${sr16_rooting}" ] \
-	|| [ -z "${sr16_tiles}" ] \
+	|| [ -z "${raster_sp}" ] \
+	|| [ -z "${raster_mht}" ] \
+	|| [ -z "${raster_mdbh}" ] \
+	|| [ -z "${raster_tht}" ] \
+	|| [ -z "${raster_nt}" ] \
+	|| [ -z "${raster_ba}" ] \
+	|| [ -z "${raster_distE}" ] \
+	|| [ -z "${raster_gapE}" ] \
+	|| [ -z "${raster_distW}" ] \
+	|| [ -z "${raster_gapW}" ] \
+	|| [ -z "${raster_distN}" ] \
+	|| [ -z "${raster_gapN}" ] \
+	|| [ -z "${raster_distS}" ] \
+	|| [ -z "${raster_gapS}" ] \
+	|| [ -z "${raster_soilgroup}" ] \
+	|| [ -z "${raster_rooting}" ] \
+	|| [ -z "${raster_tiles}" ] \
 	|| [ -z "$find_CWS_command" ] \
 	|| [ -z "${save_prefix}" ] \
 	|| [ -z "${save_dir}" ] \
@@ -139,23 +143,23 @@ if [ -z "$tile_id" ] \
 echo "ERROR: find_CWS_for_tile.sh failed, argument(s) missing"
 echo "tile_id: ${tile_id}"
 echo "dir_0: ${dir_0}"
-echo "sr16_sp: ${sr16_sp}"
-echo "sr16_mht: ${sr16_mht}"
-echo "sr16_mdbh: ${sr16_mdbh}"
-echo "sr16_tht: ${sr16_tht}"
-echo "sr16_nt: ${sr16_nt}"
-echo "sr16_ba: ${sr16_ba}"
-echo "sr16_distE: ${sr16_distE}"
-echo "sr16_gapE: ${sr16_gapE}"
-echo "sr16_distW: ${sr16_distW}"
-echo "sr16_gapW: ${sr16_gapW}"
-echo "sr16_distN: ${sr16_distN}"
-echo "sr16_gapN: ${sr16_gapN}"
-echo "sr16_distS: ${sr16_distS}"
-echo "sr16_gapS: ${sr16_gapS}"
-echo "sr16_soilgroup: ${sr16_soilgroup}"
-echo "sr16_rooting: ${sr16_rooting}"
-echo "sr16_tiles: ${sr16_tiles}"
+echo "raster_sp: ${raster_sp}"
+echo "raster_mht: ${raster_mht}"
+echo "raster_mdbh: ${raster_mdbh}"
+echo "raster_tht: ${raster_tht}"
+echo "raster_nt: ${raster_nt}"
+echo "raster_ba: ${raster_ba}"
+echo "raster_distE: ${raster_distE}"
+echo "raster_gapE: ${raster_gapE}"
+echo "raster_distW: ${raster_distW}"
+echo "raster_gapW: ${raster_gapW}"
+echo "raster_distN: ${raster_distN}"
+echo "raster_gapN: ${raster_gapN}"
+echo "raster_distS: ${raster_distS}"
+echo "raster_gapS: ${raster_gapS}"
+echo "raster_soilgroup: ${raster_soilgroup}"
+echo "raster_rooting: ${raster_rooting}"
+echo "raster_tiles: ${raster_tiles}"
 echo "find_CWS_command: ${find_CWS_command}"
 echo "save_prefix: ${save_prefix}"
 echo "save_dir: ${save_dir}"
@@ -169,11 +173,12 @@ echo "                   parameters"
 exit 1
 fi;
 
-# Go through the ForestGales specific data preparation step and calculate Critical Wind Speed with a single Rscript
-# East
-Rscript ${find_CWS_command} ${dir_0} ${tile_id} ${sr16_tiles} ${sr16_sp} ${sr16_mht} ${sr16_mdbh} ${sr16_tht} ${sr16_nt} ${sr16_ba} ${sr16_soilgroup} ${sr16_rooting} ${sr16_distE} ${sr16_gapE} ${sr16_distW} ${sr16_gapW} ${sr16_distN} ${sr16_gapN} ${sr16_distS} ${sr16_gapS} ${season} ${save_dir} ${save_prefix}
+# We then run the Rscript to calculate the critical wind speed. The R script processes the data in 2 steps.
+# First, the data is combined and goes through the ForestGales specific data preparation step to format the variables as ForestGALES expects it, and calculate any missing variable.
+# Second, the core ForestGALES function calculate the Critical Wind Speed.
+Rscript ${find_CWS_command} ${dir_0} ${tile_id} ${raster_tiles} ${raster_sp} ${raster_mht} ${raster_mdbh} ${raster_tht} ${raster_nt} ${raster_ba} ${raster_soilgroup} ${raster_rooting} ${raster_distE} ${raster_gapE} ${raster_distW} ${raster_gapW} ${raster_distN} ${raster_gapN} ${raster_distS} ${raster_gapS} ${season} ${save_dir} ${save_prefix}
 
-# compress the created tif file with gdal
+# We then compress the created tif file with gdal
 for direction in E W S N; do
 	if [ -f "${save_dir}/${save_prefix}_${direction}.tif" ]; then
 		gdaladdo -ro "${save_dir}/${save_prefix}_${direction}.tif" \
