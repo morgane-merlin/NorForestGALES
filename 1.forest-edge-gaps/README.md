@@ -10,17 +10,6 @@ The files should be copied to project_dir.
 
 ```shell
 cd cpp
-project_dir="[your_project_dir]"
-scp find_gaps_and_distances.cpp \
-    vertex_grid.cpp  vertex.h \
-    vertex.cpp \
-    vertex_grid.h \
-    ${project_dir}/cpp/
-```
-
-compile cpp (cd cpp, on server)
-
-```shell
 g++ -O3 find_gaps_and_distances.cpp vertex.cpp vertex_grid.cpp \
     -g -Wall -I/usr/include/gdal -L/usr/lib -lgdal -lm -o \
     ../find_gaps_and_distances

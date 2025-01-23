@@ -14,3 +14,12 @@ Some variables other than the ones commonly found in forest attribute rasters ar
 
 ## Scripts & routine
 The scripts work at the tile level. The Critical Wind Speed for each forest pixel is calculated in parallel with the find_CWS_Norway.sh which uses find_CWS_for_tile.sh. The find_CWS_for_tile.sh relies on the R script FGrou_CWS_SR16.R  
+
+## run the function
+
+```shell
+project_dir="[your_project_dir]"
+cd ${project_dir}
+mkdir log
+{ time ./find_CWS_Norway.sh ; } > log/YYYMMDD_find_CWS_Norway.log 2>&1
+```
