@@ -12,8 +12,7 @@ The main work was done by Morgane Merlin, with contributions from Barry Gardiner
 This repository contains the different scripts used in the routine implemented for calculating CWS for SR16 pixels under a summer scenario on relatively flat terrain (i.e. no snow loading of tree crown or effect of slope are considered here).
 The repository contains:
 1. a folder with the scripts and software for calculating the distance to the forest edge and size of the upwind forest gap in four cardinal directions. The code was written by Nils Egil Søvde (NIBIO). Currently, the edge of the forest is defined as forest to non-forest transitions, and the clearcuts. Clear limits to what is considered forest are used, based on the NFI common thresholds. Namely, mean forest height > 10 m and number of trees > 400.
-2. a folder with the two main scripts translating the fgr functions written in C/R into C++.
-3. a folder with the scripts invoking the new C++ functions for parallel processing in a Linux High Performance Computing cluster
+3. a folder with the scripts invoking the fgr R package functions translated into C++ (not available for sharing on Github) for parallel processing in a Linux High Performance Computing cluster
 
 ## Routine
 The find_gaps_and_distances.sh script from the forest-edge-gaps can be run first, then the find_CWS_Norway.sh script from the CWS_Calculation can be run after. Or the two can be combined in a single script which calls on them sequentially.
