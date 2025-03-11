@@ -13,7 +13,7 @@ Some variables other than the ones commonly found in forest attribute rasters ar
 - Parameter files: the ForestGALES general parameters and the species-specific parameter files are fgr_constants_1.txt and species_parameters_1.txt
 
 ## Scripts & routine
-The scripts work at the tile level. The Critical Wind Speed for each forest pixel is calculated in parallel with the find_CWS_Norway.sh which uses find_CWS_for_tile.sh. The find_CWS_for_tile.sh relies on the R script FGrou_CWS_SR16.R  
+The scripts work at the tile level. The Critical Wind Speed for each forest pixel is calculated in parallel with the find_CWS_Norway.sh which uses find_CWS_for_tile.sh. The find_CWS_for_tile.sh relies on the R script FGrou_CWS_SR16.R. This R script relies on the translation of the functions from the fgr R package from the R language to C++ for use in the R environment. This translation is not available in Github. The fgr package is available at the Forest Research website (https://www.forestresearch.gov.uk/tools-and-resources/fthr/forestgales/)  
 
 ## run the function
 
