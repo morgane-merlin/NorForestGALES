@@ -157,14 +157,14 @@ for(direction in c("E", "N", "S", "W")){
   if(exists("snow.r")){
     forest.sel.f <- copy(forest.sel2)[, c("stand_id", "species", "mean_dbh", "mean_ht", "spacing", "fylke", "soil_group", "rooting", "dist_edge", "gap_size", "snow_load")]
   }
-  # We run the first RCpp function to prepare the input forest datatable into the full datatable with all required variables for calculating the CWS
+  # We run the first RCpp function (not shared on Github) to prepare the input forest datatable into the full datatable with all required variables for calculating the CWS
   forest.dataprep <- fg_rou_dataprep_Norge_cpp(forest.sel.f, fgr_constants = fgr_constants, species_parameters = species_params,
                                                season = season)
   rm(forest.sel) # we remove the input forest datatable
   gc() # we clear the R session memory
   # Calculate the critical wind speed 
   message(" -- Critical Wind Speed Calculation --")
-  # we use the second RCpp function
+  # we use the second RCpp function (not shared on Github)
   forest.CWS <- fg_rou_nibio_cpp(forest.dataprep, fgr_constants = fgr_constants_FNFI, species_parameters = species_params, breakage_basecanopy = "no")$results
   setDT(forest.CWS)
   # Convert the character variables (damage factor) to numbers using the damage factor coding
