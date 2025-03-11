@@ -2,7 +2,7 @@ Date: 23/01/2025
 
 # Description
 
-In this folder are all the required scripts for calculating the critical wind speed (CWS) for breakage and overturning using the ForestGALES model for each forest pixel uof a forest attribute raster at a national level - here the SR16 data for Norway - using a Linux High Performance Computing cluster.
+In this folder are the required scripts for calculating the critical wind speed (CWS) for breakage and overturning using the ForestGALES model for each forest pixel uof a forest attribute raster at a national level - here the SR16 data for Norway - using a Linux High Performance Computing cluster.
 The scripts can easily be modified and adapted to data from another country.
 
 ## Variables
